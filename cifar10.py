@@ -203,10 +203,12 @@ def inference(images):
 
   # conv1
   with tf.variable_scope('conv1') as scope:
+    print_ojbect_shape('IMAGES', images)
     kernel = _variable_with_weight_decay('weights',
                                          shape=[5, 5, 3, 64],
                                          stddev=5e-2,
                                          wd=0.0)
+    print_ojbect_shape('KERNEL1', kernel)
     conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
     pre_activation = tf.nn.bias_add(conv, biases)
@@ -229,6 +231,7 @@ def inference(images):
                                          shape=[5, 5, 64, 64],
                                          stddev=5e-2,
                                          wd=0.0)
+    print_ojbect_shape('KERNEL2', kernel)
     conv = tf.nn.conv2d(norm1, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.1))
     pre_activation = tf.nn.bias_add(conv, biases)
@@ -397,7 +400,7 @@ def maybe_download_and_extract():
     filepath = os.path.join(dest_directory, filename)
     if not os.path.exists(filepath):
         def _progress(count, block_size, total_size):
-            #sys.stdout.write('\r>> Downloading %s %.1f%%' % filename, float(count * block_size) / float(total_size) * 100.0))
+            sys.stdout.write('\r>> Downloading %s %.1f%%' % (filename, float(count * block_size) / float(total_size) * 100.0))
             sys.stdout.flush()
         filepath, _ = urllib.request.urlretrieve(DATA_URL, filepath, _progress)
         print()
