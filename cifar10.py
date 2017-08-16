@@ -215,8 +215,19 @@ def inference(images):
     conv1 = tf.nn.relu(pre_activation, name=scope.name)
     _activation_summary(conv1)
   print_ojbect_shape('Conv1', conv1)
+  with tf.variable_scope('conv1_1') as scope:
+    kernel = _variable_with_weight_decay('weights',
+                                         shape=[5, 5, 64, 64],
+                                         stddev=5e-2,
+                                         wd=0.0)
+    print_ojbect_shape('KERNEL1', kernel)
+    conv = tf.nn.conv2d(conv1, kernel, [1, 1, 1, 1], padding='SAME')
+    biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
+    pre_activation = tf.nn.bias_add(conv, biases)
+    conv1_1 = tf.nn.relu(pre_activation, name=scope.name)
+  print_ojbect_shape('Conv1_1', conv1_1)
   # pool1
-  pool1 = tf.nn.max_pool(conv1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
+  pool1 = tf.nn.max_pool(conv1_1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
                          padding='SAME', name='pool1')
 
   print_ojbect_shape('Pool1', pool1)
@@ -237,10 +248,20 @@ def inference(images):
     pre_activation = tf.nn.bias_add(conv, biases)
     conv2 = tf.nn.relu(pre_activation, name=scope.name)
     _activation_summary(conv2)
+  with tf.variable_scope('conv2_1') as scope:
+    kernel = _variable_with_weight_decay('weights',
+                                         shape=[5, 5, 64, 64],
+                                         stddev=5e-2,
+                                         wd=0.0)
+    print_ojbect_shape('KERNEL2', kernel)
+    conv = tf.nn.conv2d(conv2, kernel, [1, 1, 1, 1], padding='SAME')
+    biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.1))
+    pre_activation = tf.nn.bias_add(conv, biases)
+    conv2_1 = tf.nn.relu(pre_activation, name=scope.name)
+    _activation_summary(conv2_1)
 
-  print_ojbect_shape('Conv2', conv2)
   # norm2
-  norm2 = tf.nn.lrn(conv2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,
+  norm2 = tf.nn.lrn(conv2_1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,
                     name='norm2')
 
   print_ojbect_shape('Norm2', norm2)
@@ -366,7 +387,8 @@ def train(total_loss, global_step):
 
   # Compute gradients.
   with tf.control_dependencies([loss_averages_op]):
-    opt = tf.train.GradientDescentOptimizer(lr)
+    #opt = tf.train.GradientDescentOptimizer(lr)
+    opt = tf.train.AdadeltaOptimizer(lr)
     grads = opt.compute_gradients(total_loss)
 
   # Apply gradients.
