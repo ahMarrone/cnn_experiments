@@ -212,7 +212,7 @@ def inference(images):
     conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
     pre_activation = tf.nn.bias_add(conv, biases)
-    conv1 = tf.nn.relu(pre_activation, name=scope.name)
+    conv1 = tf.nn.elu(pre_activation, name=scope.name)
     _activation_summary(conv1)
   print_ojbect_shape('Conv1', conv1)
   with tf.variable_scope('conv1_1') as scope:
@@ -224,7 +224,7 @@ def inference(images):
     conv = tf.nn.conv2d(conv1, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
     pre_activation = tf.nn.bias_add(conv, biases)
-    conv1_1 = tf.nn.relu(pre_activation, name=scope.name)
+    conv1_1 = tf.nn.elu(pre_activation, name=scope.name)
   print_ojbect_shape('Conv1_1', conv1_1)
   # pool1
   pool1 = tf.nn.max_pool(conv1_1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
@@ -246,7 +246,7 @@ def inference(images):
     conv = tf.nn.conv2d(norm1, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.1))
     pre_activation = tf.nn.bias_add(conv, biases)
-    conv2 = tf.nn.relu(pre_activation, name=scope.name)
+    conv2 = tf.nn.elu(pre_activation, name=scope.name)
     _activation_summary(conv2)
   with tf.variable_scope('conv2_1') as scope:
     kernel = _variable_with_weight_decay('weights',
@@ -257,7 +257,7 @@ def inference(images):
     conv = tf.nn.conv2d(conv2, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.1))
     pre_activation = tf.nn.bias_add(conv, biases)
-    conv2_1 = tf.nn.relu(pre_activation, name=scope.name)
+    conv2_1 = tf.nn.elu(pre_activation, name=scope.name)
     _activation_summary(conv2_1)
 
   # norm2
@@ -278,7 +278,7 @@ def inference(images):
     weights = _variable_with_weight_decay('weights', shape=[dim, 384],
                                           stddev=0.04, wd=0.004)
     biases = _variable_on_cpu('biases', [384], tf.constant_initializer(0.1))
-    local3 = tf.nn.relu(tf.matmul(reshape, weights) + biases, name=scope.name)
+    local3 = tf.nn.elu(tf.matmul(reshape, weights) + biases, name=scope.name)
     _activation_summary(local3)
 
   print_ojbect_shape('Local3', local3)
@@ -287,7 +287,7 @@ def inference(images):
     weights = _variable_with_weight_decay('weights', shape=[384, 192],
                                           stddev=0.04, wd=0.004)
     biases = _variable_on_cpu('biases', [192], tf.constant_initializer(0.1))
-    local4 = tf.nn.relu(tf.matmul(local3, weights) + biases, name=scope.name)
+    local4 = tf.nn.elu(tf.matmul(local3, weights) + biases, name=scope.name)
     _activation_summary(local4)
 
   print_ojbect_shape('Local4', local4)
